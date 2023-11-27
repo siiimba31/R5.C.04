@@ -13,13 +13,23 @@ function getCountry (jsonData) {
     return countries
 }
 
+function getCurrency (jsonData) {
+    let countries=[]
+    for (let i = 0; i < jsonData.length; i++){
+        if (!countries.includes(jsonData[i]["Currency"])){
+            countries.push(jsonData[i]["Currency"])
+        }
+    } 
+    return countries
+}
+
 function getWorkExp(jsonData){
     let workExps=[];
     for (let i = 0; i < jsonData.length; i++){
-        if (!workExps.includes(jsonData[i]["WorkExp"])){
-            workExps.push(jsonData[i]["WorkExp"])
+        if (!workExps.includes(Number(jsonData[i]["WorkExp"])) && jsonData[i]["WorkExp"]!='NA'){
+            workExps.push(Number(jsonData[i]["WorkExp"]))
         }
-    } 
+    }
     return workExps;
 }
 
@@ -37,64 +47,63 @@ function convertEnEuro (type,value) {
     //valeur du 20/11/2023 (2022)
     dict = {
         "AED United Arab Emirates dirham": 0.25,
-        "AFN Afghan afghani": 0.013,
-        "ALL Albanian lek": 0.0096,
-        "AMD Armenian dram": 0.0023,
+        "AFN\tAfghan afghani": 0.013,
+        "ALL\tAlbanian lek": 0.0096,
+        "AMD\tArmenian dram": 0.0023,
         "ANG Netherlands Antillean guilder": 0.51,
-        "ARS Argentine peso": 0.0026,
-        "AUD Australian dollar": 0.60,
-        "AWG Aruban florin": 0.51,
-        "AZN Azerbaijan manat": 0.54,
-        "BAM Bosnia and Herzegovina convertible mark": 0.51,
+        "ARS\tArgentine peso": 0.0026,
+        "AUD\tAustralian dollar": 0.60,
+        "AWG\tAruban florin": 0.51,
+        "AZN\tAzerbaijan manat": 0.54,
+        "BAM\tBosnia and Herzegovina convertible mark": 0.51,
         "BGN Bulgarian lev": 0.51,
-        "BIF Burundi franc": 0.00032,
+        "BIF\tBurundi franc": 0.00032,
         "BOB Bolivian boliviano": 0.13,
-        "BRL Brazilian real": 0.19,
-        "CAD Canadian dollar": 0.67,
-        "CHF Swiss franc": 1,03,
-        "CLP Chilean peso": 0.0010,
+        "BRL\tBrazilian real": 0.19,
+        "CAD\tCanadian dollar": 0.67,
+        "CHF\tSwiss franc": 1.03,
+        "CLP\tChilean peso": 0.0010,
         "CNY Chinese Yuan Renminbi": 0.13,
-        "COP Colombian peso": 0.00023,
+        "COP\tColombian peso": 0.00023,
         "CRC Costa Rican colon": 0.0017,
-        "CUP Cuban peso": 0.038,
-        "CDF Congolese franc": 0.00037,
-        "DJF Djiboutian franc": 0.0052,
+        "CUP\tCuban peso": 0.038,
+        "CDF\tCongolese franc": 0.00037,
+        "DJF\tDjiboutian franc": 0.0052,
         "EUR European Euro": 1,
-        "FJD Fijian dollar": 0.41,
-        "FKP Falkland Islands pound": 1.141,
-        "GBP Pound sterling": 1.14,
-        "GHS Ghanaian cedi": 0.077,
-        "GIP Gibraltar pound": 1.14240,
+        "FJD\tFijian dollar": 0.41,
+        "FKP\tFalkland Islands pound": 1.141,
+        "GBP\tPound sterling": 1.14,
+        "GHS\tGhanaian cedi": 0.077,
+        "GIP\tGibraltar pound": 1.14240,
         "HKD Hong Kong dollar": 0.12,
-        "HUF Hungarian forint": 0.0026,
-        "IDR Indonesian rupiah": 0.00006,
+        "HUF\tHungarian forint": 0.0026,
+        "IDR\tIndonesian rupiah": 0.00006,
         "ILS Israeli new shekel": 0.25,
         "INR Indian rupee": 0.011,
-        "IRR Iranian rial": 0.000022,
+        "IRR\tIranian rial": 0.000022,
         "JPY Japanese yen": 0.0062,
-        "LAK Lao kip": 0.000044,
+        "LAK\tLao kip": 0.000044,
         "MYR Malaysian ringgit": 0.20,
-        "NOK Norwegian krone": 0.085,
+        "NOK\tNorwegian krone": 0.085,
         "NZD New Zealand dollar": 0.55,
-        "PEN Peruvian sol": 0.24,
-        "PLN Polish zloty": 0.23,
-        "QAR Qatari riyal": 0.25,
+        "PEN\tPeruvian sol": 0.24,
+        "PLN\tPolish zloty": 0.23,
+        "QAR\tQatari riyal": 0.25,
         "SAR Saudi Arabian riyal": 0.24,
-        "SLL Sierra Leonean leone": 0.000046,
-        "THB Thai baht": 0.026,
-        "TWD New Taiwan dollar": 0.029,
-        "UAH Ukrainian hryvnia": 0.025,
+        "SLL\tSierra Leonean leone": 0.000046,
+        "THB\tThai baht": 0.026,
+        "TWD\tNew Taiwan dollar": 0.029,
+        "UAH\tUkrainian hryvnia": 0.025,
         "UGX Ugandan shilling": 0.00024,
-        "USD United States dollar": 0.91,
+        "USD\tUnited States dollar": 0.91,
         "UZS Uzbekistani som": 0.000075,
-        "XPF CFP franc": 0.0083,
-        "YER Yemeni rial": 0.0037,
-        "ZAR South African rand": 0.050,
-        "ZMW Zambian kwacha": 0.040,
-        "NA":0
+        "XPF\tCFP franc": 0.0083,
+        "YER\tYemeni rial": 0.0037,
+        "ZAR\tSouth African rand": 0.050,
+        "ZMW Zambian kwacha": 0.040
     };
-
-    return dict[type]*value;
+    euro=dict[type]*Number(value)
+    return euro;
 }
 
 //
@@ -107,25 +116,29 @@ function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
     }
     //somme des salaire
     for (let j = 0; j < jsonData.length; j++){
-        if (workExps.includes(jsonData[j]["WorkExp"])){
+        if (workExps.includes(Number(jsonData[j]["WorkExp"])) && jsonData[j]["CompTotal"]!='NA'){
             valeurConverti=convertEnEuro(jsonData[j]["Currency"],jsonData[j]["CompTotal"]);
-            dict[jsonData[j]["WorkExp"]]+=valeurConverti;
-            compteur[jsonData[j]["WorkExp"]]+=1;
+            dict[Number(jsonData[j]["WorkExp"])]+=valeurConverti;
+            compteur[Number(jsonData[j]["WorkExp"])]+=1;
         }
     }
     //diviser pour optenir la moyenne
     for (let k = 0; k < dict.length; k++){
-        dict[jsonData[k]["WorkExp"]]=dict[jsonData[k]["WorkExp"]]/compteur[jsonData[k]["WorkExp"]];
+        dict[workExps[k]]=dict[workExps[k]]/compteur[workExps[k]];
+        //console.log(dict[workExps[k]]);
     }
 
     return dict;
 }
 
 function salaireMoyenParAnneeExp (country,jsonData) {
+    console.log(getCurrency (jsonData))
     datas = getDataCountry(country,jsonData);
     workExps = getWorkExp(jsonData);
-    moyennesSalaires = calculMoyenneSalaireParAnneeExp(jsonData,workExps);
-    workExps=workExps.sort();
+    moyennesSalaires = calculMoyenneSalaireParAnneeExp(datas,workExps);
+    workExps=workExps.sort(function(a, b) {
+        return a - b;
+      });
     values=[];
     for (let i = 0; i < workExps.length; i++){
         values.push(moyennesSalaires[workExps[i]]);
@@ -150,7 +163,7 @@ function loadChart(years,values,country){
         }]
     }
     const config = {
-        type: 'line',
+        type: 'bar',
         data: data,
         options: {
             scales:{
@@ -164,6 +177,11 @@ function loadChart(years,values,country){
 }
 
 function createCountriesDropDown(divSelector,countries,myChart,jsonData){
+    var existingDropDown = divSelector.querySelector("select");
+    if (existingDropDown) {
+        divSelector.removeChild(existingDropDown);
+    }
+
     let dropDown = document.createElement("select")
     for (let country of countries){
         let option = document.createElement('option');
@@ -189,8 +207,20 @@ function execussionPage(request) {
         workExps=salaireMoyenParAnneeExp(country,jsonData)["tableauAnnees"];
         values=salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"];
         config=loadChart(workExps,values,country);
+
         var canvas = document.getElementById("myChart");
-        var myChart = new Chart(canvas, config);
+        if (canvas) {
+            var ctx = canvas.getContext('2d');
+            var existingChart = Chart.getChart(ctx);
+
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            myChart = new Chart(ctx, config);
+        }
+
+        //var myChart = new Chart(canvas, config);
 
         //Selecteur de pays
         const divSelector = document.getElementById("selector"); 
