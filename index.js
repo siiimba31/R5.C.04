@@ -14,23 +14,23 @@ function getCountry (jsonData) {
 }
 
 function getWorkExp(jsonData){
-    let workExps=[]
+    let workExps=[];
     for (let i = 0; i < jsonData.length; i++){
         if (!workExps.includes(jsonData[i]["WorkExp"])){
             workExps.push(jsonData[i]["WorkExp"])
         }
     } 
-    return workExps
+    return workExps;
 }
 
 function getDataCountry (country,jsonData) {
-    let data=[]
+    let data=[];
     for (let i = 0; i < jsonData.length; i++){
         if (jsonData[i]["Country"] === country){
             data.push(jsonData[i]);
         }
     }
-    return data
+    return data;
 }
 
 function convertEnEuro (type,value) {
