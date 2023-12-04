@@ -3,6 +3,7 @@ fonction de son nombre d’années d’expérience. L’utilisateur pourra chois
 continent, un pays, et la valeur des revenus moyens devra toujours être affichée en
 euros.*/
 
+//Récupère toutes les pays présents dans le json data
 function getCountry (jsonData) {
     let countries=[]
     for (let i = 0; i < jsonData.length; i++){
@@ -13,16 +14,18 @@ function getCountry (jsonData) {
     return countries
 }
 
+//Récupère toute les types de monnaies du json data
 function getCurrency (jsonData) {
-    let countries=[]
+    let currency=[]
     for (let i = 0; i < jsonData.length; i++){
-        if (!countries.includes(jsonData[i]["Currency"])){
-            countries.push(jsonData[i]["Currency"])
+        if (!currency.includes(jsonData[i]["Currency"])){
+            currency.push(jsonData[i]["Currency"])
         }
     } 
-    return countries
+    return currency
 }
 
+//Récupère toutes les années d'expérience présente dans le json data
 function getWorkExp(jsonData){
     let workExps=[];
     for (let i = 0; i < jsonData.length; i++){
@@ -33,6 +36,18 @@ function getWorkExp(jsonData){
     return workExps;
 }
 
+//récupère tous les niveau d'études présent dans le json data
+function getEdLevel(jsonData){
+    let edLevel=[];
+    for (let i = 0; i < jsonData.length; i++){
+        if (!edLevel.includes((jsonData[i]["EdLevel"])) && jsonData[i]["EdLevel"]!='NA'){
+            edLevel.push(jsonData[i]["EdLevel"])
+        }
+    }
+    return edLevel;
+}
+
+//Récupère les donneé correspondant au pays "country" du json data
 function getDataCountry (country,jsonData) {
     let data=[];
     for (let i = 0; i < jsonData.length; i++){
@@ -43,6 +58,8 @@ function getDataCountry (country,jsonData) {
     return data;
 }
 
+//Fonction permettant de convertir en euro un salaire
+//type correspond a la monnaie correspondnat au salaire
 function convertEnEuro (type,value) {
     //valeur du 20/11/2023 (2022)
     dict = {
@@ -106,7 +123,7 @@ function convertEnEuro (type,value) {
     return euro;
 }
 
-//
+//renvoie le salaire moyen par année d'expérience 
 function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
     let dict={};
     let compteur={};
@@ -131,8 +148,33 @@ function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
     return dict;
 }
 
+//rencoie le salaire moyen par niveau d'expérience
+function calculMoyenneSalaireParNiveauEtude(jsonData,edLevel){
+    let dict={};
+    let compteur={};
+    for (let i = 0; i < edLevel.length; i++) {
+        dict[edLevel[i]]=0;
+        compteur[edLevel[i]]=0;
+    }
+    //somme des salaire
+    for (let j = 0; j < jsonData.length; j++){
+        if (edLevel.includes(jsonData[j]["WorkExp"]) && jsonData[j]["CompTotal"]!='NA'){
+            valeurConverti=convertEnEuro(jsonData[j]["Currency"],jsonData[j]["CompTotal"]);
+            dict[jsonData[j]["WorkExp"]]+=valeurConverti;
+            compteur[jsonData[j]["WorkExp"]]+=1;
+        }
+    }
+    //diviser pour optenir la moyenne
+    for (let k = 0; k < dict.length; k++){
+        dict[edLevel[k]]=dict[edLevel[k]]/compteur[edLevel[k]];
+        //console.log(dict[workExps[k]]);
+    }
+
+    return dict;
+}
+
+//mise ne forme des données pour le chart
 function salaireMoyenParAnneeExp (country,jsonData) {
-    console.log(getCurrency (jsonData))
     datas = getDataCountry(country,jsonData);
     workExps = getWorkExp(jsonData);
     moyennesSalaires = calculMoyenneSalaireParAnneeExp(datas,workExps);
@@ -146,6 +188,7 @@ function salaireMoyenParAnneeExp (country,jsonData) {
     return {"tableauAnnees":workExps,"tableauSalaires":values};
 }
 
+//mise a jour du chart en fonction de la country
 function updateCountry (chart,jsonData,country) {
     chart.data.datasets=[{
             label:'Moyenne des salaires par années d\'expérience pour :'+country,
@@ -154,6 +197,7 @@ function updateCountry (chart,jsonData,country) {
     chart.update();
 }
 
+//rencoie la configuration du chart pour le créer 
 function loadChart(years,values,country){
     const data = {
         labels: years,
@@ -176,6 +220,7 @@ function loadChart(years,values,country){
     return config;
 }
 
+//créer le selecteur de country
 function createCountriesDropDown(divSelector,countries,myChart,jsonData){
     var existingDropDown = divSelector.querySelector("select");
     if (existingDropDown) {
@@ -208,7 +253,7 @@ function execussionPage(request) {
         values=salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"];
         config=loadChart(workExps,values,country);
 
-        var canvas = document.getElementById("myChart");
+        var canvas = document.getElementById("ChartRMAE");
         if (canvas) {
             var ctx = canvas.getContext('2d');
             var existingChart = Chart.getChart(ctx);
@@ -223,7 +268,7 @@ function execussionPage(request) {
         //var myChart = new Chart(canvas, config);
 
         //Selecteur de pays
-        const divSelector = document.getElementById("selector"); 
+        const divSelector = document.getElementById("selectorRMAE"); 
         createCountriesDropDown(divSelector,countries,myChart,jsonData);
     })
 }
