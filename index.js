@@ -188,6 +188,18 @@ function salaireMoyenParAnneeExp (country,jsonData) {
     return {"tableauAnnees":workExps,"tableauSalaires":values};
 }
 
+//mise ne forme des données pour le chart
+function salaireMoyenParNiveauEtude (country,jsonData) {
+    datas = getDataCountry(country,jsonData);
+    edLevel = getEdLevel(jsonData);
+    moyennesSalaires = calculMoyenneSalaireParNiveauEtude(datas,edLevel);
+    values=[];
+    for (let i = 0; i < workExps.length; i++){
+        values.push(moyennesSalaires[edLevel[i]]);
+    }
+    return {"tableauNiveau":edLevel,"tableauSalaires":values};
+}
+
 //mise a jour du chart en fonction de la country
 function updateCountry (chart,jsonData,country) {
     chart.data.datasets=[{
@@ -249,27 +261,48 @@ function execussionPage(request) {
         let jsonData = JSON.parse(dataString);
         let countries = getCountry(jsonData);
         country=countries[0];
+        //PREMIER CHART
         workExps=salaireMoyenParAnneeExp(country,jsonData)["tableauAnnees"];
         values=salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"];
         config=loadChart(workExps,values,country);
 
-        var canvas = document.getElementById("ChartRMAE");
-        if (canvas) {
-            var ctx = canvas.getContext('2d');
+        var canvasRMAE = document.getElementById("ChartRMAE");
+        if (canvasRMAE) {
+            var ctx = canvasRMAE.getContext('2d');
             var existingChart = Chart.getChart(ctx);
 
             if (existingChart) {
                 existingChart.destroy();
             }
-
-            myChart = new Chart(ctx, config);
+            console.log("test1");
+            ChartRMAE = new Chart(ctx, config);
         }
 
         //var myChart = new Chart(canvas, config);
 
         //Selecteur de pays
         const divSelector = document.getElementById("selectorRMAE"); 
-        createCountriesDropDown(divSelector,countries,myChart,jsonData);
+        createCountriesDropDown(divSelector,countries,ChartRMAE,jsonData);
+
+        //DEUXIEME CHART
+        edLevel=salaireMoyenParNiveauEtude(country,jsonData)["tableauNiveau"];
+        valuesRMNE=salaireMoyenParNiveauEtude(country,jsonData)["tableauSalaires"];
+        configRMNE=loadChart(edLevel,valuesRMNE,country);
+
+        var canvasRMNE = document.getElementById("ChartRMNE");
+        if (canvasRMNE) {
+            var ctx = canvasRMNE.getContext('2d');
+            var existingChart = Chart.getChart(ctx);
+
+            if (existingChart) {
+                existingChart.destroy();
+            }
+            console.log("test2");
+            ChartRMNE = new Chart(ctx, configRMNE);
+        }
+        const divSelectorRMNE = document.getElementById("selectorRMNE"); 
+        createCountriesDropDown(divSelectorRMNE,countries,ChartRMNE,jsonData);
+
     })
 }
 
