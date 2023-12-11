@@ -5,7 +5,7 @@ euros.*/
 
 //Fonction permettant de convertir en euro un salaire
 //type correspond a la monnaie correspondnat au salaire
-function convertEnEuro (type,value) {
+function convertEnEuro(type, value) {
     //valeur du 20/11/2023 (2022)
     dict = {
         "AED United Arab Emirates dirham": 0.25,
@@ -64,39 +64,39 @@ function convertEnEuro (type,value) {
         "ZAR\tSouth African rand": 0.050,
         "ZMW Zambian kwacha": 0.040
     };
-    euro=dict[type]*Number(value);
+    euro = dict[type] * Number(value);
     return euro;
 }
 
 //FONCTION RECUPERATION DE DONNEES DU JSON DATA
 
 //Récupère toutes les pays présents dans le json data
-function getCountry (jsonData) {
-    let countries=[]
-    for (let i = 0; i < jsonData.length; i++){
-        if (!countries.includes(jsonData[i]["Country"])){
+function getCountry(jsonData) {
+    let countries = []
+    for (let i = 0; i < jsonData.length; i++) {
+        if (!countries.includes(jsonData[i]["Country"])) {
             countries.push(jsonData[i]["Country"])
         }
-    } 
+    }
     return countries
 }
 
 //Récupère toute les types de monnaies du json data
-function getCurrency (jsonData) {
-    let currency=[]
-    for (let i = 0; i < jsonData.length; i++){
-        if (!currency.includes(jsonData[i]["Currency"])){
+function getCurrency(jsonData) {
+    let currency = []
+    for (let i = 0; i < jsonData.length; i++) {
+        if (!currency.includes(jsonData[i]["Currency"])) {
             currency.push(jsonData[i]["Currency"])
         }
-    } 
+    }
     return currency
 }
 
 //Récupère toutes les années d'expérience présente dans le json data
-function getWorkExp(jsonData){
-    let workExps=[];
-    for (let i = 0; i < jsonData.length; i++){
-        if (!workExps.includes(Number(jsonData[i]["WorkExp"])) && jsonData[i]["WorkExp"]!='NA'){
+function getWorkExp(jsonData) {
+    let workExps = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        if (!workExps.includes(Number(jsonData[i]["WorkExp"])) && jsonData[i]["WorkExp"] != 'NA') {
             workExps.push(Number(jsonData[i]["WorkExp"]))
         }
     }
@@ -104,87 +104,116 @@ function getWorkExp(jsonData){
 }
 
 //récupère tous les niveau d'études présent dans le json data
-function getEdLevel(jsonData){
-    let edLevel=[];
-    for (let i = 0; i < jsonData.length; i++){
-        if (!edLevel.includes((jsonData[i]["EdLevel"])) && jsonData[i]["EdLevel"]!='NA'){
+function getEdLevel(jsonData) {
+    let edLevel = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        if (!edLevel.includes((jsonData[i]["EdLevel"])) && jsonData[i]["EdLevel"] != 'NA') {
             edLevel.push(jsonData[i]["EdLevel"])
         }
     }
     return edLevel;
 }
 
+//récupère les différentes platformes
+function getPlatformWork(jsonData) {
+    let platformeWork = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        //si des platformes sont renseignées
+        if (jsonData[i]["PlatformHaveWorkedWith"] != 'NA') {
+            let platformes = (jsonData[i]["PlatformHaveWorkedWith"]).split(";");
+            //pour chaque platformes renseigné
+            for (let j = 0; j < platformes.length; j++) {
+                if (!platformeWork.includes(platformes[j])) {
+                    platformeWork.push(platformes[j]);
+                }
+            }
+        }
+    }
+    return platformeWork;
+}
+
 //Récupère les données correspondant au pays "country" du json data
-function getDataCountry (country,jsonData) {
-    let data=[];
-    for (let i = 0; i < jsonData.length; i++){
-        if (jsonData[i]["Country"] === country){
+function getDataCountry(country, jsonData) {
+    let data = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        if (jsonData[i]["Country"] === country) {
             data.push(jsonData[i]);
         }
     }
     return data;
 }
 
+//Récupère les données correspondant au pays "country" du json data
+function getDataCountryWorkExp(country, workExp, jsonData) {
+    let datas = getDataCountry(country,jsonData);
+    let data = [];
+    for (let i = 0; i < jsonData.length; i++) {
+        if (datas[i]["WorkExp"] === workExp) {
+            data.push(datas[i]);
+        }
+    } 
+    return data;
+}
 
 
 //FONCTION POUR LE PREMIER GRAPHES
 //renvoie le salaire moyen par année d'expérience 
-function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
-    let dict={};
-    let compteur={};
+function calculMoyenneSalaireParAnneeExp(jsonData, workExps) {
+    let dict = {};
+    let compteur = {};
     for (let i = 0; i < workExps.length; i++) {
-        dict[workExps[i]]=0;
-        compteur[workExps[i]]=0;
+        dict[workExps[i]] = 0;
+        compteur[workExps[i]] = 0;
     }
     //somme des salaire
-    for (let j = 0; j < jsonData.length; j++){
-        if (workExps.includes(Number(jsonData[j]["WorkExp"])) && jsonData[j]["CompTotal"]!='NA'){
-            valeurConverti=convertEnEuro(jsonData[j]["Currency"],jsonData[j]["CompTotal"]);
-            dict[Number(jsonData[j]["WorkExp"])]+=valeurConverti;
-            compteur[Number(jsonData[j]["WorkExp"])]+=1;
+    for (let j = 0; j < jsonData.length; j++) {
+        if (workExps.includes(Number(jsonData[j]["WorkExp"])) && jsonData[j]["CompTotal"] != 'NA') {
+            valeurConverti = convertEnEuro(jsonData[j]["Currency"], jsonData[j]["CompTotal"]);
+            dict[Number(jsonData[j]["WorkExp"])] += valeurConverti;
+            compteur[Number(jsonData[j]["WorkExp"])] += 1;
         }
     }
     //diviser pour optenir la moyenne
-    for (let k = 0; k < Object.keys(dict).length; k++){
-        dict[workExps[k]]=dict[workExps[k]]/compteur[workExps[k]];
+    for (let k = 0; k < Object.keys(dict).length; k++) {
+        dict[workExps[k]] = dict[workExps[k]] / compteur[workExps[k]];
     }
 
     return dict;
 }
 
 //mise ne forme des données pour le chart
-function salaireMoyenParAnneeExp (country,jsonData) {
-    datas = getDataCountry(country,jsonData);
+function salaireMoyenParAnneeExp(country, jsonData) {
+    datas = getDataCountry(country, jsonData);
     workExps = getWorkExp(jsonData);
-    moyennesSalaires = calculMoyenneSalaireParAnneeExp(datas,workExps);
-    workExps=workExps.sort(function(a, b) {
+    moyennesSalaires = calculMoyenneSalaireParAnneeExp(datas, workExps);
+    workExps = workExps.sort(function (a, b) {
         return a - b;
-      });
-    values=[];
-    for (let i = 0; i < workExps.length; i++){
+    });
+    values = [];
+    for (let i = 0; i < workExps.length; i++) {
         values.push(moyennesSalaires[workExps[i]]);
     }
-    return {"tableauAnnees":workExps,"tableauSalaires":values};
+    return { "tableauAnnees": workExps, "tableauSalaires": values };
 }
 
 //mise a jour du chart en fonction de la country
-function updateCountryRMAE (chart,jsonData,country) {
-    chart.data.datasets=[{
-            label:'Moyenne des salaires par années d\'expérience pour :'+country,
-            data:salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"]
-        }]
+function updateCountryRMAE(chart, jsonData, country) {
+    chart.data.datasets = [{
+        label: 'Moyenne des salaires par années d\'expérience pour :' + country,
+        data: salaireMoyenParAnneeExp(country, jsonData)["tableauSalaires"]
+    }]
     chart.update();
 }
 
 //créer le selecteur de country
-function createCountriesDropDownRMAE(divSelector,countries,myChart,jsonData){
+function createCountriesDropDownRMAE(divSelector, countries, myChart, jsonData) {
     var existingDropDown = divSelector.querySelector("select");
     if (existingDropDown) {
         divSelector.removeChild(existingDropDown);
     }
 
     let dropDown = document.createElement("select")
-    for (let country of countries){
+    for (let country of countries) {
         let option = document.createElement('option');
         option.value = country;
         option.text = country;
@@ -193,26 +222,26 @@ function createCountriesDropDownRMAE(divSelector,countries,myChart,jsonData){
     }
     divSelector.appendChild(dropDown);
     dropDown.addEventListener("change", (event) => {
-        country=dropDown.options[dropDown.selectedIndex].value
-        updateCountryRMAE(myChart,jsonData,country);
+        country = dropDown.options[dropDown.selectedIndex].value
+        updateCountryRMAE(myChart, jsonData, country);
     });
 }
 
 //renvoie la configuration du chart pour le créer 
-function loadChartRMAE(years,values,country){
+function loadChartRMAE(years, values, country) {
     const data = {
         labels: years,
-        datasets:[{
-            label:'Moyenne des salaires par années d\'expérience pour : '+country,
-            data:values
+        datasets: [{
+            label: 'Moyenne des salaires par années d\'expérience pour : ' + country,
+            data: values
         }]
     }
     const config = {
         type: 'bar',
         data: data,
         options: {
-            scales:{
-                y:{
+            scales: {
+                y: {
                     beginAtZero: true
                 }
             }
@@ -223,58 +252,58 @@ function loadChartRMAE(years,values,country){
 
 //FONCTION POUR LE DEUXIEME GRAPHE
 //rencoie le salaire moyen par niveau d'expérience
-function calculMoyenneSalaireParNiveauEtude(jsonData,edLevel){
-    let dict={};
-    let compteur={};
+function calculMoyenneSalaireParNiveauEtude(jsonData, edLevel) {
+    let dict = {};
+    let compteur = {};
     for (let i = 0; i < edLevel.length; i++) {
-        dict[edLevel[i]]=0;
-        compteur[edLevel[i]]=0;
+        dict[edLevel[i]] = 0;
+        compteur[edLevel[i]] = 0;
     }
     //somme des salaire
-    for (let j = 0; j < jsonData.length; j++){
-        if (edLevel.includes(jsonData[j]["EdLevel"]) && jsonData[j]["CompTotal"]!='NA'){
-            valeurConverti=convertEnEuro(jsonData[j]["Currency"],jsonData[j]["CompTotal"]);
-            dict[jsonData[j]["EdLevel"]]+=valeurConverti;
-            compteur[jsonData[j]["EdLevel"]]+=1;
+    for (let j = 0; j < jsonData.length; j++) {
+        if (edLevel.includes(jsonData[j]["EdLevel"]) && jsonData[j]["CompTotal"] != 'NA') {
+            valeurConverti = convertEnEuro(jsonData[j]["Currency"], jsonData[j]["CompTotal"]);
+            dict[jsonData[j]["EdLevel"]] += valeurConverti;
+            compteur[jsonData[j]["EdLevel"]] += 1;
         }
     }
     //diviser pour optenir la moyenne
-    for (let k = 0; k < Object.keys(dict).length; k++){
-        dict[edLevel[k]]=dict[edLevel[k]]/compteur[edLevel[k]];
+    for (let k = 0; k < Object.keys(dict).length; k++) {
+        dict[edLevel[k]] = dict[edLevel[k]] / compteur[edLevel[k]];
     }
     return dict;
 }
 
 //mise ne forme des données pour le chart
-function salaireMoyenParNiveauEtude (country,jsonData) {
-    datas = getDataCountry(country,jsonData);
+function salaireMoyenParNiveauEtude(country, jsonData) {
+    datas = getDataCountry(country, jsonData);
     edLevel = getEdLevel(jsonData);
-    moyennesSalaires = calculMoyenneSalaireParNiveauEtude(datas,edLevel);
-    values=[];
-    for (let i = 0; i < edLevel.length; i++){
+    moyennesSalaires = calculMoyenneSalaireParNiveauEtude(datas, edLevel);
+    values = [];
+    for (let i = 0; i < edLevel.length; i++) {
         values.push(moyennesSalaires[edLevel[i]]);
     }
-    return {"tableauNiveau":edLevel,"tableauSalaires":values};
+    return { "tableauNiveau": edLevel, "tableauSalaires": values };
 }
 
 //mise a jour du chart en fonction de la country
-function updateCountryRMNE (chart,jsonData,country) {
-    chart.data.datasets=[{
-            label:'Moyenne des salaires par niveau d\'étude pour :'+country,
-            data:salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"]
-        }]
+function updateCountryRMNE(chart, jsonData, country) {
+    chart.data.datasets = [{
+        label: 'Moyenne des salaires par niveau d\'étude pour :' + country,
+        data: salaireMoyenParNiveauEtude(country, jsonData)["tableauSalaires"]
+    }]
     chart.update();
 }
 
 //créer le selecteur de country
-function createCountriesDropDownRMNE(divSelector,countries,myChart,jsonData){
+function createCountriesDropDownRMNE(divSelector, countries, myChart, jsonData) {
     var existingDropDown = divSelector.querySelector("select");
     if (existingDropDown) {
         divSelector.removeChild(existingDropDown);
     }
 
     let dropDown = document.createElement("select")
-    for (let country of countries){
+    for (let country of countries) {
         let option = document.createElement('option');
         option.value = country;
         option.text = country;
@@ -283,26 +312,26 @@ function createCountriesDropDownRMNE(divSelector,countries,myChart,jsonData){
     }
     divSelector.appendChild(dropDown);
     dropDown.addEventListener("change", (event) => {
-        country=dropDown.options[dropDown.selectedIndex].value
-        updateCountryRMNE(myChart,jsonData,country);
+        country = dropDown.options[dropDown.selectedIndex].value
+        updateCountryRMNE(myChart, jsonData, country);
     });
 }
 
 //rencoie la configuration du chart pour le créer 
-function loadChartRMNE(years,values,country){
+function loadChartRMNE(years, values, country) {
     const data = {
         labels: years,
-        datasets:[{
-            label:'Moyenne des salaires par niveau d\'étude pour : '+country,
-            data:values
+        datasets: [{
+            label: 'Moyenne des salaires par niveau d\'étude pour : ' + country,
+            data: values
         }]
     }
     const config = {
         type: 'bar',
         data: data,
         options: {
-            scales:{
-                y:{
+            scales: {
+                y: {
                     beginAtZero: true
                 }
             }
@@ -311,16 +340,113 @@ function loadChartRMNE(years,values,country){
     return config;
 }
 
+//FONCTION POUR LE TROISIEME GRAPHE
+//renvoie le salaire moyen par année d'expérience 
+function calculMoyenneSalaireParPlatforme(jsonData, platformeWork) {
+    let dict = {};
+    let compteur = {};
+    for (let i = 0; i < workExps.length; i++) {
+        dict[platformeWork[i]] = 0;
+        compteur[platformeWork[i]] = 0;
+    }
+    //somme des salaire
+    for (let j = 0; j < jsonData.length; j++) {
+        if (jsonData[j]["PlatformHaveWorkedWith"] != 'NA') {
+            let platformes = (jsonData[j]["PlatformHaveWorkedWith"]).split(";");
+            //pour chaque platformes renseigné
+            for (let l = 0; l < platformes.length; l++) {
+                if (platformeWork.includes(platformes[l])) {
+                    valeurConverti = convertEnEuro(jsonData[j]["Currency"], jsonData[j]["CompTotal"]);
+                    dict[platformes[l]] += valeurConverti;
+                    compteur[platformes[l]] += 1;
+                }
+            }
+        }
+    }
+    //diviser pour optenir la moyenne
+    for (let k = 0; k < Object.keys(dict).length; k++) {
+        dict[workExps[k]] = dict[workExps[k]] / compteur[workExps[k]];
+    }
+    return dict;
+}
+
+//mise ne forme des données pour le chart
+function revenueMoyenParCloud(country, jsonData) {
+    datas = getDataCountry(country, jsonData);
+    platformeWork = getPlatformWork(jsonData);
+    moyennesSalaires = calculMoyenneSalaireParPlatforme(datas, platformeWork);
+    values = [];
+    for (let i = 0; i < edLevel.length; i++) {
+        values.push(moyennesSalaires[platformeWork[i]]);
+    }
+    return { "tableauNiveau": platformeWork, "tableauSalaires": values };
+}
+
+//mise a jour du chart en fonction de la country
+function updateCountryRMPC(chart, jsonData, country) {
+
+    chart.data.datasets = [{
+        label: 'Moyenne des salaires par niveau d\'étude pour :' + country,
+        data: revenueMoyenParCloud(country, jsonData)["tableauSalaires"]
+    }]
+    chart.update();
+}
+
+//créer le selecteur de country
+function createCountriesDropDownRMPC(divSelector, countries, myChart, jsonData) {
+    var existingDropDown = divSelector.querySelector("select");
+    if (existingDropDown) {
+        divSelector.removeChild(existingDropDown);
+    }
+
+    let dropDown = document.createElement("select")
+    for (let country of countries) {
+        let option = document.createElement('option');
+        option.value = country;
+        option.text = country;
+        // On ajoute l'option au dropDown
+        dropDown.appendChild(option);
+    }
+    divSelector.appendChild(dropDown);
+    dropDown.addEventListener("change", (event) => {
+        country = dropDown.options[dropDown.selectedIndex].value
+        updateCountryRMPC(myChart, jsonData, country);
+    });
+}
+
+//créer le selecteur de country
+function createCountriesDropDownWorkExpRMPC(divSelector, workExps, myChart, jsonData) {
+    var existingDropDown = divSelector.querySelector("select");
+    if (existingDropDown) {
+        divSelector.removeChild(existingDropDown);
+    }
+
+    let dropDown = document.createElement("select")
+    for (let workExp of workExps) {
+        let option = document.createElement('option');
+        option.value = workExp;
+        option.text = workExp;
+        // On ajoute l'option au dropDown
+        dropDown.appendChild(option);
+    }
+    divSelector.appendChild(dropDown);
+    dropDown.addEventListener("change", (event) => {
+        country = dropDown.options[dropDown.selectedIndex].value
+        updateCountryRMNE(myChart, jsonData, country);
+    });
+}
+
+//PAGE
 function execussionPage(request) {
-    request.done(function(output){
+    request.done(function (output) {
         let dataString = JSON.stringify(output);
         let jsonData = JSON.parse(dataString);
         let countries = getCountry(jsonData);
-        country=countries[0];
+        country = countries[0];
         //PREMIER CHART
-        workExps=salaireMoyenParAnneeExp(country,jsonData)["tableauAnnees"];
-        valuesRMAE=salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"];
-        configRMAE=loadChartRMAE(workExps,valuesRMAE,country);
+        workExps = salaireMoyenParAnneeExp(country, jsonData)["tableauAnnees"];
+        valuesRMAE = salaireMoyenParAnneeExp(country, jsonData)["tableauSalaires"];
+        configRMAE = loadChartRMAE(workExps, valuesRMAE, country);
 
         var canvasRMAE = document.getElementById("ChartRMAE");
         if (canvasRMAE) {
@@ -334,14 +460,14 @@ function execussionPage(request) {
         }
 
         //Selecteur de pays
-        const divSelector = document.getElementById("selectorRMAE"); 
-        createCountriesDropDownRMAE(divSelector,countries,ChartRMAE,jsonData);
- 
+        const divSelector = document.getElementById("selectorRMAE");
+        createCountriesDropDownRMAE(divSelector, countries, ChartRMAE, jsonData);
+
 
         //DEUXIEME CHART
-        edLevel=salaireMoyenParNiveauEtude(country,jsonData)["tableauNiveau"];
-        valuesRMNE=salaireMoyenParNiveauEtude(country,jsonData)["tableauSalaires"];
-        configRMNE=loadChartRMNE(edLevel,valuesRMNE,country);
+        edLevel = salaireMoyenParNiveauEtude(country, jsonData)["tableauNiveau"];
+        valuesRMNE = salaireMoyenParNiveauEtude(country, jsonData)["tableauSalaires"];
+        configRMNE = loadChartRMNE(edLevel, valuesRMNE, country);
 
         var canvasRMNE = document.getElementById("ChartRMNE");
         if (canvasRMNE) {
@@ -353,8 +479,10 @@ function execussionPage(request) {
             }
             ChartRMNE = new Chart(ctx2, configRMNE);
         }
-        const divSelectorRMNE = document.getElementById("selectorRMNE"); 
-        createCountriesDropDownRMNE(divSelectorRMNE,countries,ChartRMNE,jsonData);
+        const divSelectorRMNE = document.getElementById("selectorRMNE");
+        createCountriesDropDownRMNE(divSelectorRMNE, countries, ChartRMNE, jsonData);
+
+        console.log(getPlatformWork(jsonData));
 
     })
 }
@@ -363,9 +491,9 @@ function execussionPage(request) {
 function chargerJSON() {
     var selectElement = document.getElementById("selectRegion");
     var selectedValue = selectElement.value;
-    var cheminFichierJSON = "jeuDeDonnees/survey_results_"+ selectedValue + ".json";
+    var cheminFichierJSON = "jeuDeDonnees/survey_results_" + selectedValue + ".json";
 
-    let request= $.ajax({
+    let request = $.ajax({
         type: "GET",
         url: cheminFichierJSON
     })
@@ -377,9 +505,9 @@ function chargerJSON() {
 $(document).ready(function () {
     var selectElement = document.getElementById("selectRegion");
     var selectedValue = selectElement.value;
-    var cheminFichierJSON = "jeuDeDonnees/survey_results_"+ selectedValue + ".json";
+    var cheminFichierJSON = "jeuDeDonnees/survey_results_" + selectedValue + ".json";
 
-    let request= $.ajax({
+    let request = $.ajax({
         type: "GET",
         url: cheminFichierJSON
     })
