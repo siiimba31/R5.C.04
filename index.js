@@ -114,6 +114,51 @@ function getEdLevel(jsonData){
     return edLevel;
 }
 
+//récupère tous les metiers présent dans le json data
+function getDevType(jsonData){
+    let devType=[];
+    for (let i = 0; i < jsonData.length; i++){
+        if (!devType.includes((jsonData[i]["DevType"])) 
+                && jsonData[i]["DevType"]!='NA' 
+                && jsonData[i]["DevType"]!='Other (please specify):'){
+            devType.push(jsonData[i]["DevType"])
+        }
+    }
+    devType.sort();
+    return devType;
+}
+
+function getOpSys(jsondata) {
+    var opSysValues = [];
+    for (var i = 0; i < jsondata.length; i++) {
+      if (jsondata[i]["OpSysProfessionaluse"]) {
+        var values = jsondata[i]["OpSysProfessionaluse"].split(';');
+        values.forEach(function(value) {
+          if (!opSysValues.includes(value.trim())) {
+            opSysValues.push(value.trim());
+          }
+        });
+      }
+    }
+    return opSysValues;
+  }
+
+  function getToolComm(jsondata) {
+    var toolCommValues = [];
+    for (var i = 0; i < jsondata.length; i++) {
+      if (jsondata[i]["OfficeStackSyncHaveWorkedWith"]) {
+        var values = jsondata[i]["OfficeStackSyncHaveWorkedWith"].split(';');
+        values.forEach(function(value) {
+          if (!toolCommValues.includes(value.trim())) {
+            toolCommValues.push(value.trim());
+          }
+        });
+      }
+    }
+    return toolCommValues;
+  }
+
+
 //Récupère les données correspondant au pays "country" du json data
 function getDataCountry (country,jsonData) {
     let data=[];
@@ -152,7 +197,7 @@ function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
     return dict;
 }
 
-//mise ne forme des données pour le chart
+//mise en forme des données pour le chart
 function salaireMoyenParAnneeExp (country,jsonData) {
     datas = getDataCountry(country,jsonData);
     workExps = getWorkExp(jsonData);
@@ -311,6 +356,183 @@ function loadChartRMNE(years,values,country){
     return config;
 }
 
+//FONCTION POUR LE GRAPH SUR LES SYSTEME D'EXP
+
+//mise en forme des données pour le chart
+function topSystExpParMetier (devType,jsonData,nbTop) {
+    //compter chaque systeme d'exp
+    let compteur={};
+    opSys = getOpSys(jsonData);
+    for (let i = 0; i < opSys.length; i++) {
+        compteur[opSys[i]]=0;
+    }
+    for (let i = 0; i < jsonData.length; i++) {
+        if (devType.includes(jsonData[i]["DevType"])){
+            var responsesArray = jsonData[i]["OpSysProfessionaluse"].split(';');
+            for (let j = 0; j < responsesArray.length; j++) {
+                compteur[responsesArray[j].trim()]+=1;
+            }
+        }
+    }
+    
+    let compteurArray = Object.entries(compteur).map(([key, value]) => ({ key, value }));
+    compteurArray.sort((a, b) => b.value - a.value);
+
+    let topSystems = compteurArray.slice(0, nbTop);
+
+    let topLabels = topSystems.map(item => item.key);
+    let topValues = topSystems.map(item => item.value);
+
+    return {"tableauLabels":topLabels,"tableauValues":topValues};
+}
+
+//mise a jour du chart en fonction du metier
+function updateMetierTUSE (chart,jsonData,metier,nbTop) {
+    chart.data = {
+            labels: topSystExpParMetier(metier,jsonData,nbTop)["tableauLabels"],
+            datasets:[{
+            label:'Nombre de :'+metier+' qui ont repondu',
+            data:topSystExpParMetier(metier,jsonData,nbTop)["tableauValues"]
+            }]
+        }
+    chart.update();
+}
+
+//créer le selecteur de métiers
+function createMetiersDropDownTUSE(divSelector,metiers,myChart,jsonData,nbTop){
+    var existingDropDown = divSelector.querySelector("select");
+    if (existingDropDown) {
+        divSelector.removeChild(existingDropDown);
+    }
+
+    let dropDown = document.createElement("select")
+    for (let metier of metiers){
+        let option = document.createElement('option');
+        option.value = metier;
+        option.text = metier;
+        // On ajoute l'option au dropDown
+        dropDown.appendChild(option);
+    }
+    divSelector.appendChild(dropDown);
+    dropDown.addEventListener("change", (event) => {
+        metier=dropDown.options[dropDown.selectedIndex].value
+        updateMetierTUSE(myChart,jsonData,metier,nbTop);
+    });
+}
+
+//rencoie la configuration du chart pour le créer 
+function loadChartTUSE(systExps,values,metier,defaultColors){
+    const data = {
+        labels: systExps,
+        datasets:[{
+            label:'Nombre de :'+metier+' qui ont repondu',
+            data:values,
+            backgroundColor: defaultColors
+        }]
+    }
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: {
+            rotation: -90, // Pour positionner le debut a l'horizontale gauche
+            circumference: 180, // demi-cercle
+            responsive: true, //adaptation à la taille du canva
+            maintainAspectRatio: false
+        }
+    };
+    return config;
+}
+
+//FONCTION POUR LE GRAPH SUR LES Outils de comm
+
+//mise en forme des données pour le chart
+function topToolCommsParMetier (devType,jsonData,nbTop) {
+    //compter chaque systeme d'exp
+    let compteur={};
+    toolComm = getToolComm(jsonData);
+    for (let i = 0; i < toolComm.length; i++) {
+        compteur[toolComm[i]]=0;
+    }
+    for (let i = 0; i < jsonData.length; i++) {
+        if (devType.includes(jsonData[i]["DevType"])){
+            var responsesArray = jsonData[i]["OfficeStackSyncHaveWorkedWith"].split(';');
+            for (let j = 0; j < responsesArray.length; j++) {
+                compteur[responsesArray[j].trim()]+=1;
+            }
+        }
+    }
+    let compteurArray = Object.entries(compteur).map(([key, value]) => ({ key, value }));
+    compteurArray.sort((a, b) => b.value - a.value);
+
+    let topToolComms = compteurArray.slice(0, nbTop);
+
+    let topLabels = topToolComms.map(item => item.key);
+    let topValues = topToolComms.map(item => item.value);
+
+    return {"tableauLabels":topLabels,"tableauValues":topValues};
+}
+
+//mise a jour du chart en fonction du metier
+function updateMetierTUOC (chart,jsonData,metier,nbTop) {
+    chart.data = {
+        labels: topToolCommsParMetier(metier,jsonData,nbTop)["tableauLabels"],
+        datasets:[{
+            label:'Nombre de :'+metier+' qui ont repondu',
+            data:topToolCommsParMetier(metier,jsonData,nbTop)["tableauValues"]
+        }]
+    }
+    chart.update();
+}
+
+//créer le selecteur de métiers
+function createMetiersDropDownTUOC(divSelector,metiers,myChart,jsonData,nbTop){
+    var existingDropDown = divSelector.querySelector("select");
+    if (existingDropDown) {
+        divSelector.removeChild(existingDropDown);
+    }
+
+    let dropDown = document.createElement("select")
+    for (let metier of metiers){
+        let option = document.createElement('option');
+        option.value = metier;
+        option.text = metier;
+        // On ajoute l'option au dropDown
+        dropDown.appendChild(option);
+    }
+    divSelector.appendChild(dropDown);
+    dropDown.addEventListener("change", (event) => {
+        metier=dropDown.options[dropDown.selectedIndex].value
+        updateMetierTUOC(myChart,jsonData,metier,nbTop);
+    });
+}
+
+//rencoie la configuration du chart pour le créer 
+function loadChartTUOC(toolComms,values,metier,defaultColors){
+    const data = {
+        labels: toolComms,
+        datasets:[{
+            label:'Nombre de :'+metier+' qui ont repondu',
+            data:values,
+            backgroundColor: defaultColors
+        }]
+    }
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: {
+            rotation: -90, // Pour positionner le debut a l'horizontale gauche
+            circumference: 180, // demi-cercle
+            responsive: true, //adaptation à la taille du canva
+            maintainAspectRatio: false,
+            /*animation: {
+                animateRotate: false,
+                animateScale: true
+            }*/
+        }
+    };
+    return config;
+}
+
 function execussionPage(request) {
     request.done(function(output){
         let dataString = JSON.stringify(output);
@@ -356,6 +578,59 @@ function execussionPage(request) {
         const divSelectorRMNE = document.getElementById("selectorRMNE"); 
         createCountriesDropDownRMNE(divSelectorRMNE,countries,ChartRMNE,jsonData);
 
+        //Chart sur les tech utilisées
+        let devTypes = getDevType(jsonData);
+        let devType=devTypes[0];
+        var defaultColors = [
+            'rgba(255, 51, 51, 1)',      // Rouge moins adouci
+            'rgba(255, 128, 51, 1)',     // Orange moins adouci
+            'rgba(255, 255, 102, 1)',    // Jaune moins adouci
+            'rgba(102, 153, 102, 1)',    // Vert moins adouci
+            'rgba(102, 102, 204, 1)',    // Bleu moins adouci
+            'rgba(128, 102, 153, 1)',    // Indigo moins adouci
+            'rgba(153, 102, 153, 1)',    // Violet moins adouci
+            'rgba(255, 77, 148, 1)'      // Rose moins adouci
+        ];
+
+        //CHART SYSTEME D'EXP
+        let nbTopTUSE=8;
+        systExps=topSystExpParMetier(devType,jsonData,nbTopTUSE)["tableauLabels"];
+        valuesTUSE=topSystExpParMetier(devType,jsonData,nbTopTUSE)["tableauValues"];
+        configTUSE=loadChartTUSE(systExps,valuesTUSE,devType,defaultColors)
+
+        var canvasTUSE = document.getElementById("ChartTUSE");
+        if (canvasTUSE) {
+            var ctx5 = canvasTUSE.getContext('2d');
+            var existingChart5 = Chart.getChart(ctx5);
+
+            if (existingChart5) {
+                existingChart5.destroy();
+            }
+            ChartTUSE = new Chart(ctx5, configTUSE);
+        }
+
+        const divSelectorTUSE = document.getElementById("selectorTUSE")
+        createMetiersDropDownTUSE(divSelectorTUSE,devTypes,ChartTUSE,jsonData,nbTopTUSE);
+
+        //CHART OUTILS COMM
+        let nbTopTUOC=8;
+        toolComms=topToolCommsParMetier(devType,jsonData,nbTopTUOC)["tableauLabels"];
+        valuesTUOC=topToolCommsParMetier(devType,jsonData,nbTopTUOC)["tableauValues"];
+        configTUOC=loadChartTUOC(toolComms,valuesTUOC,devType,defaultColors)
+
+        var canvasTUOC = document.getElementById("ChartTUOC");
+        if (canvasTUOC) {
+            var ctx6 = canvasTUOC.getContext('2d');
+            var existingChart6 = Chart.getChart(ctx6);
+
+            if (existingChart6) {
+                existingChart6.destroy();
+            }
+            ChartTUOC = new Chart(ctx6, configTUOC);
+        }
+
+        const divSelectorTUOC = document.getElementById("selectorTUOC")
+        createMetiersDropDownTUOC(divSelectorTUOC,devTypes,ChartTUOC,jsonData,nbTopTUOC);
     })
 }
 
