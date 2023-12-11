@@ -238,14 +238,10 @@ function calculMoyenneSalaireParNiveauEtude(jsonData,edLevel){
             compteur[jsonData[j]["EdLevel"]]+=1;
         }
     }
-    console.log(dict);
-    console.log(compteur);
     //diviser pour optenir la moyenne
     for (let k = 0; k < Object.keys(dict).length; k++){
-        console.log("test");
         dict[edLevel[k]]=dict[edLevel[k]]/compteur[edLevel[k]];
     }
-    console.log(dict);
     return dict;
 }
 
