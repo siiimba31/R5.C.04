@@ -64,7 +64,7 @@ function convertEnEuro (type,value) {
         "ZAR\tSouth African rand": 0.050,
         "ZMW Zambian kwacha": 0.040
     };
-    euro=dict[type]*Number(value)
+    euro=dict[type]*Number(value);
     return euro;
 }
 
@@ -114,7 +114,7 @@ function getEdLevel(jsonData){
     return edLevel;
 }
 
-//Récupère les donneé correspondant au pays "country" du json data
+//Récupère les données correspondant au pays "country" du json data
 function getDataCountry (country,jsonData) {
     let data=[];
     for (let i = 0; i < jsonData.length; i++){
@@ -145,9 +145,8 @@ function calculMoyenneSalaireParAnneeExp(jsonData,workExps){
         }
     }
     //diviser pour optenir la moyenne
-    for (let k = 0; k < dict.length; k++){
+    for (let k = 0; k < Object.keys(dict).length; k++){
         dict[workExps[k]]=dict[workExps[k]]/compteur[workExps[k]];
-        //console.log(dict[workExps[k]]);
     }
 
     return dict;
@@ -199,7 +198,7 @@ function createCountriesDropDownRMAE(divSelector,countries,myChart,jsonData){
     });
 }
 
-//rencoie la configuration du chart pour le créer 
+//renvoie la configuration du chart pour le créer 
 function loadChartRMAE(years,values,country){
     const data = {
         labels: years,
@@ -233,18 +232,20 @@ function calculMoyenneSalaireParNiveauEtude(jsonData,edLevel){
     }
     //somme des salaire
     for (let j = 0; j < jsonData.length; j++){
-        if (edLevel.includes(jsonData[j]["WorkExp"]) && jsonData[j]["CompTotal"]!='NA'){
+        if (edLevel.includes(jsonData[j]["EdLevel"]) && jsonData[j]["CompTotal"]!='NA'){
             valeurConverti=convertEnEuro(jsonData[j]["Currency"],jsonData[j]["CompTotal"]);
-            dict[jsonData[j]["WorkExp"]]+=valeurConverti;
-            compteur[jsonData[j]["WorkExp"]]+=1;
+            dict[jsonData[j]["EdLevel"]]+=valeurConverti;
+            compteur[jsonData[j]["EdLevel"]]+=1;
         }
     }
+    console.log(dict);
+    console.log(compteur);
     //diviser pour optenir la moyenne
-    for (let k = 0; k < dict.length; k++){
+    for (let k = 0; k < Object.keys(dict).length; k++){
+        console.log("test");
         dict[edLevel[k]]=dict[edLevel[k]]/compteur[edLevel[k]];
-        //console.log(dict[workExps[k]]);
     }
-
+    console.log(dict);
     return dict;
 }
 
@@ -254,7 +255,7 @@ function salaireMoyenParNiveauEtude (country,jsonData) {
     edLevel = getEdLevel(jsonData);
     moyennesSalaires = calculMoyenneSalaireParNiveauEtude(datas,edLevel);
     values=[];
-    for (let i = 0; i < workExps.length; i++){
+    for (let i = 0; i < edLevel.length; i++){
         values.push(moyennesSalaires[edLevel[i]]);
     }
     return {"tableauNiveau":edLevel,"tableauSalaires":values};
@@ -333,14 +334,13 @@ function execussionPage(request) {
             if (existingChart) {
                 existingChart.destroy();
             }
-            console.log("test1");
             ChartRMAE = new Chart(ctx, configRMAE);
         }
 
         //Selecteur de pays
         const divSelector = document.getElementById("selectorRMAE"); 
         createCountriesDropDownRMAE(divSelector,countries,ChartRMAE,jsonData);
-
+ 
 
         //DEUXIEME CHART
         edLevel=salaireMoyenParNiveauEtude(country,jsonData)["tableauNiveau"];
@@ -355,7 +355,6 @@ function execussionPage(request) {
             if (existingChart2) {
                 existingChart2.destroy();
             }
-            console.log("test2");
             ChartRMNE = new Chart(ctx2, configRMNE);
         }
         const divSelectorRMNE = document.getElementById("selectorRMNE"); 
