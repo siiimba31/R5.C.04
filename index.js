@@ -345,7 +345,7 @@ function loadChartRMNE(years, values, country) {
 function calculMoyenneSalaireParPlatforme(jsonData, platformeWork) {
     let dict = {};
     let compteur = {};
-    for (let i = 0; i < workExps.length; i++) {
+    for (let i = 0; i < platformeWork.length; i++) {
         dict[platformeWork[i]] = 0;
         compteur[platformeWork[i]] = 0;
     }
@@ -355,7 +355,7 @@ function calculMoyenneSalaireParPlatforme(jsonData, platformeWork) {
             let platformes = (jsonData[j]["PlatformHaveWorkedWith"]).split(";");
             //pour chaque platformes renseigné
             for (let l = 0; l < platformes.length; l++) {
-                if (platformeWork.includes(platformes[l])) {
+                if (platformeWork.includes(platformes[l]) && jsonData[j]["CompTotal"] != 'NA') {
                     valeurConverti = convertEnEuro(jsonData[j]["Currency"], jsonData[j]["CompTotal"]);
                     dict[platformes[l]] += valeurConverti;
                     compteur[platformes[l]] += 1;
@@ -365,7 +365,7 @@ function calculMoyenneSalaireParPlatforme(jsonData, platformeWork) {
     }
     //diviser pour optenir la moyenne
     for (let k = 0; k < Object.keys(dict).length; k++) {
-        dict[workExps[k]] = dict[workExps[k]] / compteur[workExps[k]];
+        dict[platformeWork[k]] = dict[platformeWork[k]] / compteur[platformeWork[k]];
     }
     return dict;
 }
@@ -376,7 +376,7 @@ function revenueMoyenParCloud(country, jsonData) {
     platformeWork = getPlatformWork(jsonData);
     moyennesSalaires = calculMoyenneSalaireParPlatforme(datas, platformeWork);
     values = [];
-    for (let i = 0; i < edLevel.length; i++) {
+    for (let i = 0; i < platformeWork.length; i++) {
         values.push(moyennesSalaires[platformeWork[i]]);
     }
     return { "tableauNiveau": platformeWork, "tableauSalaires": values };
@@ -436,6 +436,29 @@ function createCountriesDropDownWorkExpRMPC(divSelector, workExps, myChart, json
     });
 }
 
+//rencoie la configuration du chart pour le créer 
+function loadChartRMPC(years, values, country) {
+    const data = {
+        labels: years,
+        datasets: [{
+            label: 'Revenue moyen en fonction des plateformes de cloud pour : ' + country,
+            data: values
+        }]
+    }
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    }
+    return config;
+}
+
 //PAGE
 function execussionPage(request) {
     request.done(function (output) {
@@ -482,8 +505,23 @@ function execussionPage(request) {
         const divSelectorRMNE = document.getElementById("selectorRMNE");
         createCountriesDropDownRMNE(divSelectorRMNE, countries, ChartRMNE, jsonData);
 
-        console.log(getPlatformWork(jsonData));
+        //TROISIEME CHART
+        cloud = revenueMoyenParCloud(country, jsonData)["tableauNiveau"];
+        valuesRMPC = revenueMoyenParCloud(country, jsonData)["tableauSalaires"];
+        configRMPC = loadChartRMPC(cloud, valuesRMPC, country);
 
+        var canvasRMPC = document.getElementById("ChartRMPC");
+        if (canvasRMPC) {
+            var ctx3 = canvasRMPC.getContext('2d');
+            var existingChart3 = Chart.getChart(ctx3);
+
+            if (existingChart3) {
+                existingChart3.destroy();
+            }
+            ChartRMPC = new Chart(ctx3, configRMPC);
+        }
+        const divSelectorCountryRMPC = document.getElementById("selectorCountryRMPC");
+        createCountriesDropDownRMPC(divSelectorCountryRMPC, countries, ChartRMPC, jsonData);
     })
 }
 
