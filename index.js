@@ -295,7 +295,7 @@ function loadChartRMAE(years,values,country){
         }]
     }
     const config = {
-        type: 'bar',
+        type: 'scatter',
         data: data,
         options: {
             scales:{
@@ -341,14 +341,21 @@ function salaireMoyenParNiveauEtude (country,jsonData) {
     for (let i = 0; i < edLevel.length; i++){
         values.push(moyennesSalaires[edLevel[i]]);
     }
-    return {"tableauNiveau":edLevel,"tableauSalaires":values};
+    let modifiedEdLevel = edLevel.map(function(year) {
+       let parts = year.split('(');
+        let modifiedYear = parts[0];
+        modifiedYear = modifiedYear.trim();
+        return modifiedYear;
+      });
+    console.log(modifiedEdLevel)
+    return {"tableauNiveau":modifiedEdLevel,"tableauSalaires":values};
 }
 
 //mise a jour du chart en fonction de la country
 function updateCountryRMNE (chart,jsonData,country) {
     chart.data.datasets=[{
             label:'Moyenne des salaires par niveau d\'étude pour :'+country,
-            data:salaireMoyenParAnneeExp(country,jsonData)["tableauSalaires"]
+            data:salaireMoyenParNiveauEtude(country,jsonData)["tableauSalaires"]
         }]
     chart.update();
 }
@@ -377,8 +384,15 @@ function createCountriesDropDownRMNE(divSelector,countries,myChart,jsonData){
 
 //rencoie la configuration du chart pour le créer 
 function loadChartRMNE(years,values,country){
+    let modifiedEdLevel = years.map(function(year) {
+        let parts = year.split('(');
+         let modifiedYear = parts[0];
+         modifiedYear = modifiedYear.trim();
+         return modifiedYear;
+       });
+    console.log("pourt"+modifiedEdLevel);
     const data = {
-        labels: years,
+        labels: modifiedEdLevel,
         datasets:[{
             label:'Moyenne des salaires par niveau d\'étude pour : '+country,
             data:values
@@ -388,11 +402,12 @@ function loadChartRMNE(years,values,country){
         type: 'bar',
         data: data,
         options: {
-            scales:{
-                y:{
+            indexAxis: 'y',
+            /*scales:{
+                x:{
                     beginAtZero: true
                 }
-            }
+            }*/
         }
     }
     return config;
@@ -642,7 +657,7 @@ function loadChartRMFD(years, values, country) {
     const data = {
         labels: years,
         datasets: [{
-            label: 'Revenue moyen en fonction des plateformes de cloud pour : ' + country,
+            label: 'Revenue moyen en fonction des frameworks de développement web pour : ' + country,
             data: values
         }]
     }
@@ -916,7 +931,9 @@ function execussionPage(request) {
 
         //DEUXIEME CHART
         edLevel=salaireMoyenParNiveauEtude(country,jsonData)["tableauNiveau"];
+        console.log(edLevel);
         valuesRMNE=salaireMoyenParNiveauEtude(country,jsonData)["tableauSalaires"];
+        console.log(valuesRMNE);
         configRMNE=loadChartRMNE(edLevel,valuesRMNE,country);
 
         var canvasRMNE = document.getElementById("ChartRMNE");
