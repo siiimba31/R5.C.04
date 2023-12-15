@@ -1,0 +1,3 @@
+URL attendu des fichier ./jeuDeDonnees/nomdufichier
+le nom du fichier doit être survey_results_NA.json ou survey_results_WE.json
+sinon modifier manuellement ligne 1070 du fichier index.js
