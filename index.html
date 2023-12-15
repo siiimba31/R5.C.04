@@ -12,7 +12,7 @@
   <script src="index.js"></script>
 </head>
 <body>
-    <h1>Projet Javascript</h1>
+    <h1 style="text-align: center;">Projet Javascript</h1>
     <label for="selectRegion">Sélectionnez le continent :</label>
     <select id="selectRegion" onchange="chargerJSON()">
         <option value="WE">Europe</option>
@@ -29,16 +29,24 @@
     </div>
 
     <h2>Technologies les plus utilisées</h2>
-    <h3>Top 5 des système d'exp.</h3>
-    <div id="selectorTUSE"></div>
+    <h3>Top 
+      <div id="nbTopTUSE" style="display: inline;"></div>
+      des système d'exp. pour 
+      <div id="selectorTUSE" style="display: inline;"></div>
+    </h3>
     <div style="width:800px;">
       <canvas id="ChartTUSE"></canvas>
     </div>
 
-    <h3>Top 5 des outils de comm.</h3>
-    <div id="selectorTUOC"></div>
+    <h3>Top 
+      <div id="nbTopTUOC" style="display: inline;"></div> 
+      des outils de comm. pour 
+      <div id="selectorTUOC" style="display: inline;"></div>
+    </h3>
     <div style="width:800px;">
       <canvas id="ChartTUOC"></canvas>
     </div>
+    <br>
+    <p style="text-align: center;">Projet réalisé par Elena Chelle et Gaïa Ducournau du groupe E.</p>
 </body>
 </html>
