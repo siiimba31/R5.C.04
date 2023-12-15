@@ -1,31 +1,45 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8">
   <title>Projet Javascript</title>
   <link rel="stylesheet">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js">
   </script>
-  <script type="text/javascript" 
-    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+  </script>
   <script src="index.js"></script>
 </head>
-<body>
-    <h1>Projet Javascript</h1>
-    <label for="selectRegion">Sélectionnez le continent :</label>
-    <select id="selectRegion" onchange="chargerJSON()">
-        <option value="WE">Europe</option>
-        <option value="NA">Amérique</option>
-    </select>
-    <div id="selectorRMAE"></div>
-    <div style="width:800px;">
-        <canvas id="ChartRMAE"></canvas>
-    </div>
 
-    <div id="selectorRMNE"></div>
-    <div style="width:800px;">
-      <canvas id="ChartRMNE"></canvas>
+<body>
+  <h1>Projet Javascript</h1>
+  <label for="selectRegion">Sélectionnez le continent :</label>
+  <select id="selectRegion" onchange="chargerJSON()">
+    <option value="WE">Europe</option>
+    <option value="NA">Amérique</option>
+  </select>
+  <div id="selectorRMAE"></div>
+  <div style="width:800px;">
+    <canvas id="ChartRMAE"></canvas>
+  </div>
+
+  <div id="selectorRMNE"></div>
+  <div style="width:800px;">
+    <canvas id="ChartRMNE"></canvas>
+  </div>
+
+  <div id="selectorCountryRMPC"></div>
+  <div id="selectorAnneeExpRMPC"></div>
+  <div style="width:800px;">
+    <canvas id="ChartRMPC"></canvas>
+  </div>
+
+  <div id="selectorCountryRMFD"></div>
+  <div id="selectorAnneeExpRMFD"></div>
+  <div style="width:800px;">
+    <canvas id="ChartRMFD"></canvas>
   </div>
 </body>
+
 </html>
